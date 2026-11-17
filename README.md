@@ -141,3 +141,7 @@ All player-facing text is English (FR-021).
 
 - A real screen-reader pass (V14) and a teammate playtest (V20) are still **not run**.
 - Progress is not saved across reloads, by design for v1.
+
+## License
+
+Apache-2.0. See `LICENSE`.
