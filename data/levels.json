@@ -1,0 +1,224 @@
+{
+  "schemaVersion": 1,
+  "sources": [
+    { "id": "rfc7947-s1", "title": "RFC 7947 — Internet Exchange BGP Route Server", "url": "https://www.rfc-editor.org/rfc/rfc7947#section-1", "section": "§1", "claim": "A route server does not forward traffic itself and is therefore not a router." },
+    { "id": "rfc7947-s2.2.1", "title": "RFC 7947 — Internet Exchange BGP Route Server", "url": "https://www.rfc-editor.org/rfc/rfc7947#section-2.2.1", "section": "§2.2.1 NEXT_HOP Attribute", "claim": "The NEXT_HOP is passed unmodified to route server clients, so packets go directly to the announcing member's router." },
+    { "id": "rfc7908-s2", "title": "RFC 7908 — Problem Definition and Classification of BGP Route Leaks", "url": "https://www.rfc-editor.org/rfc/rfc7908#section-2", "section": "§2", "claim": "A route leak is the propagation of routing announcements beyond their intended scope." },
+    { "id": "rfc7908-s3.2", "title": "RFC 7908 — Problem Definition and Classification of BGP Route Leaks", "url": "https://www.rfc-editor.org/rfc/rfc7908#section-3.2", "section": "§3.2 Lateral ISP-ISP-ISP Leak", "claim": "Passing a route learned from one peer on to another peer is a route leak." },
+    { "id": "rfc7908-s3.3", "title": "RFC 7908 — Problem Definition and Classification of BGP Route Leaks", "url": "https://www.rfc-editor.org/rfc/rfc7908#section-3.3", "section": "§3.3 Leak of Transit-Provider Prefixes to Peer", "claim": "Announcing routes learned from a transit provider to a peer is a route leak." },
+    { "id": "rfc1812-s5.2.4.3", "title": "RFC 1812 — Requirements for IP Version 4 Routers", "url": "https://www.rfc-editor.org/rfc/rfc1812#section-5.2.4.3", "section": "§5.2.4.3 Next Hop Address (rule 2, Longest Match)", "claim": "When several routes match a destination, the router uses the one with the longest prefix." },
+    { "id": "rfc4271-s5.1.5", "title": "RFC 4271 — A Border Gateway Protocol 4 (BGP-4)", "url": "https://www.rfc-editor.org/rfc/rfc4271#section-5.1.5", "section": "§5.1.5 LOCAL_PREF", "claim": "LOCAL_PREF is a well-known attribute a network uses to express its preference among routes." },
+    { "id": "rfc4271-s9.1.1", "title": "RFC 4271 — A Border Gateway Protocol 4 (BGP-4)", "url": "https://www.rfc-editor.org/rfc/rfc4271#section-9.1.1", "section": "§9.1.1 Phase 1: Calculation of Degree of Preference", "claim": "The LOCAL_PREF value is taken as the degree of preference among routes for the same prefix." },
+    { "id": "rfc5737-s3", "title": "RFC 5737 — IPv4 Address Blocks Reserved for Documentation", "url": "https://www.rfc-editor.org/rfc/rfc5737#section-3", "section": "§3", "claim": "192.0.2.0/24, 198.51.100.0/24 and 203.0.113.0/24 are reserved for documentation." },
+    { "id": "rfc5398-s4", "title": "RFC 5398 — AS Number Reservation for Documentation Use", "url": "https://www.rfc-editor.org/rfc/rfc5398#section-4", "section": "§4", "claim": "AS numbers 64496–64511 are reserved for documentation." },
+    { "id": "rfc2544-c2.2", "title": "RFC 2544 — Benchmarking Methodology for Network Interconnect Devices", "url": "https://www.rfc-editor.org/rfc/rfc2544", "section": "Appendix C.2.2 Protocol Addresses", "claim": "198.18.0.0 through 198.19.255.255 (198.18.0.0/15) is reserved for benchmark testing." }
+  ],
+  "levels": [
+    {
+      "id": "L1",
+      "title": "Who is in the hall?",
+      "outcome": "LO1: Identify whether a destination is reachable over IXP peering, and name the member that receives the traffic.",
+      "briefing": {
+        "paragraphs": [
+          "You are on call at Lagoa Fiber (AS64500), a small regional ISP. Lagoa Fiber has two ways to send traffic out. It pays GlobalTransit (AS64510) for transit, which can reach every destination. It has also just joined an Internet Exchange Point (IXP): a shared switch where member networks exchange traffic with each other for free. That free exchange is called peering.",
+          "At this IXP, members do not set up a BGP session with every other member. Each member has one session with the route server. The route server collects the routes each member announces and hands them to all the others. It is a directory, not a road: it never forwards packets. The routes it hands out still point at the announcing member's router, so packets cross the IXP switch straight to that member.",
+          "To pick an exit, find the routes whose prefix contains the destination address. If an IXP peer and transit offer the same prefix, Lagoa Fiber prefers the peer: peer routes get LOCAL_PREF 200 and transit routes get LOCAL_PREF 100. That preference is Lagoa Fiber's own policy, not a rule of BGP.",
+          "This game simplifies real BGP: IPv4 only, one route server, every session up, and no AS_PATH or later tie-breaks. All addresses and AS numbers come from ranges reserved for documentation."
+        ],
+        "terms": [
+          { "term": "IXP (Internet Exchange Point)", "definition": "A shared switch where networks connect to exchange traffic directly." },
+          { "term": "Member", "definition": "A network connected to the IXP switch." },
+          { "term": "Peering", "definition": "Two networks exchanging traffic for free, each for its own users." },
+          { "term": "Transit", "definition": "A paid service: the provider carries your traffic to the whole Internet." },
+          { "term": "Route server", "definition": "The IXP's route directory. It shares announcements between members but does not carry packets." },
+          { "term": "Prefix announcement", "definition": "A network telling others: send traffic for this block of addresses (for example 192.0.2.0/24) to me." },
+          { "term": "LOCAL_PREF", "definition": "A number a network attaches to its own routes to say which one it prefers. Higher wins." }
+        ],
+        "workedExample": "Destination 192.0.2.40. CampusNet announces 192.0.2.0/24 at the IXP, and GlobalTransit also has 192.0.2.0/24. Both routes have the same length, so Lagoa Fiber's policy picks the peer (LOCAL_PREF 200 beats 100). Exit: CampusNet, straight across the IXP switch. The route server only told us about the route; it never touches the packet.",
+        "sourceIds": ["rfc7947-s1", "rfc7947-s2.2.1", "rfc4271-s5.1.5", "rfc5737-s3", "rfc5398-s4"]
+      },
+      "rounds": [
+        {
+          "id": "L1R1",
+          "prompt": "A packet for 198.51.100.25 is leaving Lagoa Fiber. Which exit does the router use?",
+          "challenge": {
+            "self": { "id": "lagoa", "name": "Lagoa Fiber", "asn": 64500 },
+            "routeServer": { "id": "rs", "name": "Route Server", "asn": 64504 },
+            "transit": { "id": "globaltransit", "name": "GlobalTransit", "asn": 64510, "localPref": 100, "routes": ["192.0.2.0/24", "198.51.100.0/24", "203.0.113.0/24", "198.18.0.0/15"] },
+            "peerLocalPref": 200,
+            "networks": [
+              { "id": "campusnet", "name": "CampusNet", "asn": 64501, "atIxp": true, "prefixes": ["192.0.2.0/24"] },
+              { "id": "streamco", "name": "StreamCo", "asn": 64502, "atIxp": true, "prefixes": ["198.51.100.0/24"] }
+            ],
+            "relationships": [],
+            "showAnnouncements": true,
+            "destination": "198.51.100.25",
+            "choices": ["campusnet", "streamco", "rs", "globaltransit"]
+          },
+          "hints": [
+            { "kind": "method", "text": "List every route whose prefix contains the destination. If an IXP peer and transit offer the same prefix, the peer wins. Remember that the route server is never in the packet's path.", "sourceIds": ["rfc7947-s1", "rfc4271-s9.1.1"] },
+            { "kind": "worked", "text": "198.51.100.25 is inside 198.51.100.0/24. StreamCo announces that /24 at the IXP (LOCAL_PREF 200) and GlobalTransit has it too (LOCAL_PREF 100). Same length, so the peer route wins. Exit: StreamCo.", "sourceIds": ["rfc4271-s9.1.1"] }
+          ]
+        },
+        {
+          "id": "L1R2",
+          "prompt": "A packet for 203.0.113.10 is leaving Lagoa Fiber. Which exit does the router use?",
+          "challenge": {
+            "self": { "id": "lagoa", "name": "Lagoa Fiber", "asn": 64500 },
+            "routeServer": { "id": "rs", "name": "Route Server", "asn": 64504 },
+            "transit": { "id": "globaltransit", "name": "GlobalTransit", "asn": 64510, "localPref": 100, "routes": ["192.0.2.0/24", "198.51.100.0/24", "203.0.113.0/24", "198.18.0.0/15"] },
+            "peerLocalPref": 200,
+            "networks": [
+              { "id": "campusnet", "name": "CampusNet", "asn": 64501, "atIxp": true, "prefixes": ["192.0.2.0/24"] },
+              { "id": "streamco", "name": "StreamCo", "asn": 64502, "atIxp": true, "prefixes": ["198.51.100.0/24"] }
+            ],
+            "relationships": [],
+            "showAnnouncements": true,
+            "destination": "203.0.113.10",
+            "choices": ["campusnet", "streamco", "rs", "globaltransit"]
+          },
+          "hints": [
+            { "kind": "method", "text": "Look for an IXP route whose prefix contains the destination. Joining an IXP only reaches the networks that announce routes there; everything else still needs transit.", "sourceIds": ["rfc7947-s1"] },
+            { "kind": "worked", "text": "The IXP members announce only 192.0.2.0/24 (CampusNet) and 198.51.100.0/24 (StreamCo). Neither contains 203.0.113.10. Only GlobalTransit has 203.0.113.0/24, so the packet leaves through transit. Exit: GlobalTransit.", "sourceIds": ["rfc1812-s5.2.4.3"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L2",
+      "title": "What do peers share?",
+      "outcome": "LO2: Predict which prefixes a peer announces from its business relationships: its own and its customers', never its providers' or other peers'.",
+      "briefing": {
+        "paragraphs": [
+          "Networks have business relationships. A customer pays a provider to carry its traffic to the whole Internet. Two peers exchange traffic for free, but only for their own networks and their customers.",
+          "So a peer announces at the IXP its own prefixes plus the prefixes of its customers (and its customers' customers). It does not announce routes it learned from its own providers or from other peers. Doing so would let Lagoa Fiber ride on the peer's paid links for free. RFC 7908 calls that a route leak.",
+          "In this level the IXP route table is hidden at first. You see who is a customer of whom, and you predict what each peer announces. After you submit an answer, the real announcements are revealed."
+        ],
+        "terms": [
+          { "term": "Customer", "definition": "A network that pays a provider for transit." },
+          { "term": "Provider", "definition": "A network that sells transit to its customers." },
+          { "term": "Peer", "definition": "A network that exchanges traffic for free, only for its own and its customers' addresses." },
+          { "term": "Customer cone", "definition": "A network plus its customers, their customers, and so on. This is what a peer announces." },
+          { "term": "Route leak", "definition": "Announcing a route beyond its intended scope, for example passing a provider's routes to a peer." }
+        ],
+        "workedExample": "Suppose CampusNet buys transit from a provider that owns 198.19.0.0/16. CampusNet announces its own 192.0.2.0/24 at the IXP, but not the provider's block: that route was learned from a provider. Now suppose StreamCo sells service to a customer that owns 203.0.113.0/24. StreamCo does announce that /24 at the IXP, because it belongs to StreamCo's customer cone.",
+        "sourceIds": ["rfc7908-s2", "rfc7908-s3.2", "rfc7908-s3.3"]
+      },
+      "rounds": [
+        {
+          "id": "L2R1",
+          "prompt": "A packet for 203.0.113.77 is leaving Lagoa Fiber. Use the relationships to predict the IXP routes. Which exit does the router use?",
+          "challenge": {
+            "self": { "id": "lagoa", "name": "Lagoa Fiber", "asn": 64500 },
+            "routeServer": { "id": "rs", "name": "Route Server", "asn": 64504 },
+            "transit": { "id": "globaltransit", "name": "GlobalTransit", "asn": 64510, "localPref": 100, "routes": ["192.0.2.0/24", "198.51.100.0/24", "203.0.113.0/24", "198.18.0.0/15"] },
+            "peerLocalPref": 200,
+            "networks": [
+              { "id": "campusnet", "name": "CampusNet", "asn": 64501, "atIxp": true, "prefixes": ["192.0.2.0/24"] },
+              { "id": "streamco", "name": "StreamCo", "asn": 64502, "atIxp": true, "prefixes": ["198.51.100.0/24"] },
+              { "id": "schoolnet", "name": "SchoolNet", "asn": 64503, "atIxp": false, "prefixes": ["203.0.113.0/24"] }
+            ],
+            "relationships": [{ "provider": "campusnet", "customer": "schoolnet" }],
+            "showAnnouncements": false,
+            "destination": "203.0.113.77",
+            "choices": ["campusnet", "streamco", "rs", "globaltransit"]
+          },
+          "hints": [
+            { "kind": "method", "text": "Find which network owns the destination. Then check whether it is a customer of an IXP member: peers announce their customers' prefixes as well as their own.", "sourceIds": ["rfc7908-s2"] },
+            { "kind": "worked", "text": "SchoolNet owns 203.0.113.0/24 and is CampusNet's customer, so CampusNet announces it at the IXP (LOCAL_PREF 200). GlobalTransit also has the /24 (LOCAL_PREF 100). Same length, peer preferred. Exit: CampusNet.", "sourceIds": ["rfc4271-s9.1.1"] }
+          ]
+        },
+        {
+          "id": "L2R2",
+          "prompt": "A packet for 198.18.5.5 is leaving Lagoa Fiber. Use the relationships to predict the IXP routes. Which exit does the router use?",
+          "challenge": {
+            "self": { "id": "lagoa", "name": "Lagoa Fiber", "asn": 64500 },
+            "routeServer": { "id": "rs", "name": "Route Server", "asn": 64504 },
+            "transit": { "id": "globaltransit", "name": "GlobalTransit", "asn": 64510, "localPref": 100, "routes": ["192.0.2.0/24", "198.51.100.0/24", "203.0.113.0/24", "198.18.0.0/15"] },
+            "peerLocalPref": 200,
+            "networks": [
+              { "id": "campusnet", "name": "CampusNet", "asn": 64501, "atIxp": true, "prefixes": ["192.0.2.0/24"] },
+              { "id": "streamco", "name": "StreamCo", "asn": 64502, "atIxp": true, "prefixes": ["198.51.100.0/24"] },
+              { "id": "bigcarrier", "name": "BigCarrier", "asn": 64511, "atIxp": false, "prefixes": ["198.18.0.0/15"] }
+            ],
+            "relationships": [{ "provider": "bigcarrier", "customer": "streamco" }],
+            "showAnnouncements": false,
+            "destination": "198.18.5.5",
+            "choices": ["campusnet", "streamco", "rs", "globaltransit"]
+          },
+          "hints": [
+            { "kind": "method", "text": "Find which network owns the destination and how it is related to each IXP member. A peer only announces its own and its customers' prefixes, never its provider's.", "sourceIds": ["rfc7908-s3.3"] },
+            { "kind": "worked", "text": "BigCarrier owns 198.18.0.0/15 and is StreamCo's provider, so StreamCo does not announce it at the IXP. No IXP route contains 198.18.5.5. Only GlobalTransit's 198.18.0.0/15 matches. Exit: GlobalTransit.", "sourceIds": ["rfc7908-s3.3", "rfc1812-s5.2.4.3"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L3",
+      "title": "Longest match first",
+      "outcome": "LO3: Apply longest prefix match before the peer-over-transit preference.",
+      "briefing": {
+        "paragraphs": [
+          "A router can hold several routes that contain the same address, with different prefix lengths. A longer prefix, such as /24, describes a smaller and more specific block than a shorter one, such as /22.",
+          "The router always forwards on the longest matching prefix. Only when the longest prefix is offered by both an IXP peer and transit does Lagoa Fiber's preference decide (LOCAL_PREF 200 for peers, 100 for transit). Remember: that preference is Lagoa Fiber's policy, not a rule of BGP.",
+          "Real routers compare more attributes after LOCAL_PREF. This game leaves out AS_PATH length and later tie-breaks, MED, communities, RPKI/IRR filtering, bilateral-only sessions, multiple route servers, IPv6, outages, return paths, and traffic engineering, and it avoids cases where they would matter."
+        ],
+        "terms": [
+          { "term": "Prefix length", "definition": "The number after the slash. /24 fixes the first 24 bits, leaving 256 addresses." },
+          { "term": "Longest prefix match", "definition": "Among all routes that contain the destination, the router uses the one with the longest prefix." },
+          { "term": "More-specific route", "definition": "A longer prefix inside a shorter one, for example 198.18.2.0/24 inside 198.18.0.0/22." }
+        ],
+        "workedExample": "Destination 192.0.2.200. Suppose CampusNet announces 192.0.2.0/24 at the IXP and transit has 192.0.2.128/25. The address is in both blocks. /25 is longer than /24, so the packet leaves through transit, even though CampusNet is a peer.",
+        "sourceIds": ["rfc1812-s5.2.4.3", "rfc4271-s9.1.1", "rfc2544-c2.2"]
+      },
+      "rounds": [
+        {
+          "id": "L3R1",
+          "prompt": "A packet for 198.18.2.50 is leaving Lagoa Fiber. Which exit does the router use?",
+          "challenge": {
+            "self": { "id": "lagoa", "name": "Lagoa Fiber", "asn": 64500 },
+            "routeServer": { "id": "rs", "name": "Route Server", "asn": 64504 },
+            "transit": { "id": "globaltransit", "name": "GlobalTransit", "asn": 64510, "localPref": 100, "routes": ["192.0.2.0/24", "198.51.100.0/24", "203.0.113.0/24", "198.18.0.0/15", "198.18.0.0/22", "198.18.2.0/24"] },
+            "peerLocalPref": 200,
+            "networks": [
+              { "id": "campusnet", "name": "CampusNet", "asn": 64501, "atIxp": true, "prefixes": ["192.0.2.0/24"] },
+              { "id": "streamco", "name": "StreamCo", "asn": 64502, "atIxp": true, "prefixes": ["198.18.0.0/22"] },
+              { "id": "cloudnine", "name": "CloudNine", "asn": 64507, "atIxp": false, "prefixes": ["198.18.2.0/24"] }
+            ],
+            "relationships": [],
+            "showAnnouncements": true,
+            "destination": "198.18.2.50",
+            "choices": ["campusnet", "streamco", "rs", "globaltransit"]
+          },
+          "hints": [
+            { "kind": "method", "text": "Write down every prefix that contains the destination, with its length. Pick the longest first; only then compare peer and transit.", "sourceIds": ["rfc1812-s5.2.4.3"] },
+            { "kind": "worked", "text": "198.18.2.50 is inside 198.18.0.0/15, 198.18.0.0/22 and 198.18.2.0/24. The longest is /24, and only GlobalTransit has it (CloudNine is not at the IXP). Exit: GlobalTransit.", "sourceIds": ["rfc1812-s5.2.4.3"] }
+          ]
+        },
+        {
+          "id": "L3R2",
+          "prompt": "A packet for 198.18.1.200 is leaving Lagoa Fiber. Which exit does the router use?",
+          "challenge": {
+            "self": { "id": "lagoa", "name": "Lagoa Fiber", "asn": 64500 },
+            "routeServer": { "id": "rs", "name": "Route Server", "asn": 64504 },
+            "transit": { "id": "globaltransit", "name": "GlobalTransit", "asn": 64510, "localPref": 100, "routes": ["192.0.2.0/24", "198.51.100.0/24", "203.0.113.0/24", "198.18.0.0/15", "198.18.0.0/22", "198.18.2.0/24"] },
+            "peerLocalPref": 200,
+            "networks": [
+              { "id": "campusnet", "name": "CampusNet", "asn": 64501, "atIxp": true, "prefixes": ["192.0.2.0/24"] },
+              { "id": "streamco", "name": "StreamCo", "asn": 64502, "atIxp": true, "prefixes": ["198.18.0.0/22"] },
+              { "id": "cloudnine", "name": "CloudNine", "asn": 64507, "atIxp": false, "prefixes": ["198.18.2.0/24"] }
+            ],
+            "relationships": [],
+            "showAnnouncements": true,
+            "destination": "198.18.1.200",
+            "choices": ["campusnet", "streamco", "rs", "globaltransit"]
+          },
+          "hints": [
+            { "kind": "method", "text": "List the prefixes that contain the destination. Check carefully where each block starts and ends. Use the longest; if a peer and transit tie on length, apply the peer preference.", "sourceIds": ["rfc1812-s5.2.4.3", "rfc4271-s9.1.1"] },
+            { "kind": "worked", "text": "198.18.1.200 is inside 198.18.0.0/15 and 198.18.0.0/22, but not 198.18.2.0/24 (that block runs from 198.18.2.0 to 198.18.2.255). The longest match is /22, offered by StreamCo (LOCAL_PREF 200) and GlobalTransit (LOCAL_PREF 100). Peer preferred. Exit: StreamCo.", "sourceIds": ["rfc1812-s5.2.4.3", "rfc4271-s9.1.1"] }
+          ]
+        }
+      ]
+    }
+  ]
+}

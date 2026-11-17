@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Exchange Hall</title>
+  <meta name="description" content="A short game about how traffic leaves a network at an Internet Exchange Point.">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#app">Skip to the game</a>
+  <header class="site-header">
+    <div class="brand">
+      <h1>Exchange Hall</h1>
+      <p class="tagline">Where does the packet leave? An IXP peering game.</p>
+    </div>
+    <button type="button" id="restart-btn" class="btn btn-quiet">Restart</button>
+  </header>
+
+  <main id="app" tabindex="-1">
+    <noscript>Exchange Hall needs JavaScript. Start it from a web server as described in the README.</noscript>
+  </main>
+
+  <!-- Announces feedback and view changes to assistive technology. -->
+  <div id="live" class="visually-hidden" role="status" aria-live="polite"></div>
+
+  <dialog id="restart-dialog" aria-labelledby="restart-title">
+    <h2 id="restart-title">Restart the session?</h2>
+    <p>All progress, attempts and hints in this session will be cleared, and you will return to the first briefing.</p>
+    <div class="dialog-actions">
+      <button type="button" id="restart-cancel" class="btn">Cancel</button>
+      <button type="button" id="restart-confirm" class="btn btn-danger">Restart session</button>
+    </div>
+  </dialog>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

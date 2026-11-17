@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Exchange Hall tests</title>
+  <style>
+    body { font: 16px/1.5 system-ui, sans-serif; margin: 2rem; background: #fff; color: #111; }
+    #banner { font-size: 1.5rem; font-weight: 700; padding: .5rem 1rem; border: 3px solid; }
+    #banner.pass { border-color: #1a7f37; color: #1a7f37; }
+    #banner.fail { border-color: #b42318; color: #b42318; }
+    li { font-family: ui-monospace, monospace; }
+  </style>
+</head>
+<body>
+  <h1>Exchange Hall — test runner</h1>
+  <p id="banner" role="status">Running…</p>
+  <p id="totals"></p>
+  <h2>Failed tests</h2>
+  <ul id="failed"></ul>
+  <script type="module">
+    import { run } from './runner.js';
+    const banner = document.getElementById('banner');
+    try {
+      await import('./ipv4.test.js');
+      await import('./rules.test.js');
+      await import('./content.test.js');
+      await import('./state.test.js');
+      await import('./feedback.test.js');
+      const r = await run();
+      banner.textContent = r.ok ? 'PASS' : 'FAIL';
+      banner.className = r.ok ? 'pass' : 'fail';
+      document.getElementById('totals').textContent =
+        `Total: ${r.total} · Passed: ${r.passed} · Failed: ${r.failed.length}` +
+        (r.total === 0 ? ' · No tests discovered' : '');
+      const ul = document.getElementById('failed');
+      if (r.failed.length === 0) ul.innerHTML = '<li>none</li>';
+      for (const f of r.failed) {
+        const li = document.createElement('li');
+        li.textContent = `${f.id}: ${f.message}`;
+        ul.appendChild(li);
+      }
+      document.body.dataset.result = r.ok ? 'pass' : 'fail';
+    } catch (err) {
+      banner.textContent = 'FAIL';
+      banner.className = 'fail';
+      document.getElementById('totals').textContent = 'Runner error: ' + err.message;
+      document.body.dataset.result = 'fail';
+    }
+  </script>
+</body>
+</html>

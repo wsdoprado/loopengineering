@@ -1,0 +1,176 @@
+/* Exchange Hall — layout, focus, feedback states, reduced motion, narrow layout. */
+:root {
+  --bg: #f6f4ef;
+  --surface: #ffffff;
+  --ink: #1b1f24;
+  --muted: #59606b;
+  --line: #d6d2c8;
+  --accent: #0b5cad;
+  --accent-ink: #ffffff;
+  --peer: #0b7a5a;
+  --transit: #9a5b00;
+  --rs: #6b4fa3;
+  --ok: #1a7f37;
+  --ok-bg: #e9f6ed;
+  --bad: #b42318;
+  --bad-bg: #fdecea;
+  --focus: #ffb000;
+  --radius: 10px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14171b; --surface: #1d2127; --ink: #e8e6e1; --muted: #a3a9b3; --line: #343a43;
+    --accent: #6aa8ff; --accent-ink: #0b1220; --peer: #4cc9a0; --transit: #f0b04a; --rs: #b59cf0;
+    --ok: #5fd08a; --ok-bg: #12301f; --bad: #ff8a80; --bad-bg: #3a1714; --focus: #ffcc4d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14171b; --surface: #1d2127; --ink: #e8e6e1; --muted: #a3a9b3; --line: #343a43;
+  --accent: #6aa8ff; --accent-ink: #0b1220; --peer: #4cc9a0; --transit: #f0b04a; --rs: #b59cf0;
+  --ok: #5fd08a; --ok-bg: #12301f; --bad: #ff8a80; --bad-bg: #3a1714; --focus: #ffcc4d;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+h1, h2, h3 { line-height: 1.2; }
+a { color: var(--accent); }
+code, .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.visually-hidden {
+  position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.skip-link { position: absolute; left: -999px; top: 0; background: var(--surface); padding: .5rem 1rem; z-index: 10; }
+.skip-link:focus { left: 1rem; }
+
+.site-header {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: .75rem 16px; border-bottom: 1px solid var(--line); background: var(--surface);
+}
+.site-header h1 { margin: 0; font-size: 1.35rem; letter-spacing: .01em; }
+.tagline { margin: 0; color: var(--muted); font-size: .9rem; }
+
+main { max-width: 1200px; margin: 0 auto; padding: 1rem 16px 3rem; }
+main:focus { outline: none; }
+
+.panel {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 1rem 1.25rem; margin-bottom: 1rem;
+}
+.panel h2 { margin-top: 0; }
+.panel h3 { margin: 0 0 .5rem; font-size: 1.05rem; }
+
+.btn {
+  font: inherit; font-weight: 600; cursor: pointer;
+  padding: .55rem 1rem; min-height: 44px; border-radius: 8px;
+  border: 2px solid var(--accent); background: var(--surface); color: var(--accent);
+}
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-quiet { border-color: var(--line); color: var(--ink); }
+.btn-danger { border-color: var(--bad); background: var(--bad); color: #fff; }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+/* Progress strip */
+.progress { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; color: var(--muted); font-size: .9rem; margin: 0 0 .75rem; }
+.progress strong { color: var(--ink); }
+
+/* Round layout: challenge first, then action, explanation beside (wide) or below (narrow). */
+.round-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 1rem; align-items: start; }
+.round-main, .round-side { min-width: 0; }
+.prompt { font-size: 1.15rem; font-weight: 600; margin: 0 0 .25rem; }
+.destination { font-size: 1.05rem; }
+.destination code { font-size: 1.15rem; padding: .1rem .4rem; border-radius: 6px; background: var(--bg); border: 1px solid var(--line); }
+
+/* Topology */
+.topology svg { width: 100%; height: auto; display: block; }
+.topology .node rect { fill: var(--surface); stroke: var(--line); stroke-width: 2; }
+.topology .node text, .topology text { fill: var(--ink); font: 13px system-ui, sans-serif; }
+.topology .node .sub { fill: var(--muted); font-size: 11px; }
+.topology .switch rect { stroke: var(--peer); stroke-width: 3; }
+.topology .desk rect { stroke: var(--rs); stroke-dasharray: 5 4; }
+.topology .transit rect { stroke: var(--transit); stroke-width: 3; }
+.topology .self rect { stroke: var(--accent); stroke-width: 3; }
+.topology .outside rect { stroke-dasharray: 2 3; }
+.topology .link { stroke: var(--peer); stroke-width: 4; fill: none; }
+.topology .road { stroke: var(--transit); stroke-width: 6; fill: none; }
+.topology .control { stroke: var(--rs); stroke-width: 1.5; stroke-dasharray: 4 4; fill: none; }
+.topology .rel { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+.topology .packet { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.topology .path-trace { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 6 5; }
+.topology-summary { font-size: .9rem; color: var(--muted); margin: .5rem 0 0; }
+
+/* Tables */
+.table-region { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; margin: .5rem 0 1rem; }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+caption { text-align: left; font-weight: 700; padding: .5rem .75rem; }
+th, td { text-align: left; padding: .4rem .75rem; border-top: 1px solid var(--line); white-space: nowrap; }
+th { background: var(--bg); font-weight: 600; }
+td.src-ixp { color: var(--peer); font-weight: 600; }
+td.src-transit { color: var(--transit); font-weight: 600; }
+.hidden-note { color: var(--muted); font-style: italic; margin: .25rem 0 1rem; }
+
+/* Choices */
+fieldset.choices { border: 1px solid var(--line); border-radius: var(--radius); padding: .75rem 1rem 1rem; margin: 0 0 1rem; }
+fieldset.choices legend { font-weight: 700; padding: 0 .25rem; }
+.choice { display: flex; align-items: center; gap: .6rem; padding: .45rem .5rem; border-radius: 8px; min-height: 44px; cursor: pointer; }
+.choice:hover { background: var(--bg); }
+.choice input { width: 1.2rem; height: 1.2rem; flex: none; }
+.choice .kind { color: var(--muted); font-size: .85rem; }
+.actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+
+/* Feedback: color plus words */
+.feedback { border-left: 6px solid var(--line); }
+.feedback.ok { border-left-color: var(--ok); background: var(--ok-bg); }
+.feedback.bad { border-left-color: var(--bad); background: var(--bad-bg); }
+.feedback .headline { font-size: 1.15rem; }
+.feedback.ok .headline::before { content: "✓ "; color: var(--ok); }
+.feedback.bad .headline::before { content: "✗ "; color: var(--bad); }
+.feedback .sources { font-size: .85rem; margin: .5rem 0 0; padding-left: 1.1rem; }
+.guidance { border-left: 6px solid var(--focus); }
+
+.hints ol { padding-left: 1.2rem; }
+.assist { font-size: .9rem; color: var(--muted); }
+
+/* Briefing */
+.briefing dl { display: grid; grid-template-columns: max-content 1fr; gap: .35rem 1rem; }
+.briefing dt { font-weight: 700; }
+.briefing dd { margin: 0; }
+.worked { background: var(--bg); border-radius: 8px; padding: .75rem 1rem; }
+
+/* Summary */
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; margin: 0 0 1rem; }
+.stat { border: 1px solid var(--line); border-radius: 8px; padding: .75rem; }
+.stat dt { color: var(--muted); font-size: .9rem; }
+.stat dd { margin: 0; font-size: 1.6rem; font-weight: 700; }
+
+dialog { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink); max-width: min(32rem, calc(100vw - 32px)); }
+dialog::backdrop { background: rgb(0 0 0 / .45); }
+.dialog-actions { display: flex; justify-content: flex-end; gap: .5rem; flex-wrap: wrap; }
+
+.error-panel { border-left: 6px solid var(--bad); }
+
+/* Narrow windows: single column, tables scroll in their own region, buttons stay reachable. */
+@media (max-width: 600px) {
+  .round-grid { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: 1fr; }
+  .briefing dl { grid-template-columns: 1fr; }
+  .briefing dd { margin-bottom: .5rem; }
+  .site-header { flex-wrap: wrap; }
+  .panel { padding: .85rem; }
+}
+
+/* Reduced motion: no packet animation; the final position is drawn immediately by the script. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
